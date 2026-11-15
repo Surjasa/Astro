@@ -56,8 +56,8 @@ const GameController = (() => {
   }
 
   // ---- Start game ----
-  async function startGame(location) {
-    GameState.init(location);
+  async function startGame(location, chapter) {
+    GameState.init(location, chapter);
     UI.showScreen('game-screen');
     await loadNextSol();
   }

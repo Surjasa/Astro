@@ -5,6 +5,8 @@
 
 const UI = (() => {
 
+  let historicalDatasetCache = null;
+
   // ---- Screen switch ----
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -256,10 +258,195 @@ const UI = (() => {
     btnC.appendChild(confirmBtn);
   }
 
+  function openStageOneGame(onComplete) {
+    const overlay = document.getElementById('stage-one-overlay');
+    const message = document.getElementById('stage-one-message');
+    const result = document.getElementById('stage-one-result');
+    const continueButton = document.getElementById('stage-one-continue');
+    const sources = [...document.querySelectorAll('.stage-one-source')];
+    if (!overlay || !message || !result || !continueButton || !sources.length) return;
+
+    const identified = new Set();
+    const correctMessages = {
+      solar: 'Correct! Solar particle events can send dangerous radiation toward the outpost.',
+      cosmic: 'Correct! Galactic cosmic rays travel through space at very high energy.',
+      magnetic: 'Correct! Without Earth-like protection, the exposed environment increases radiation risk.'
+    };
+
+    message.textContent = 'Mission briefing: identify the radiation sources shown in the space scene.';
+    result.textContent = '';
+    continueButton.hidden = true;
+    sources.forEach(source => {
+      source.classList.remove('source-correct', 'source-wrong');
+      source.disabled = false;
+      source.onclick = () => {
+        if (identified.has(source.dataset.source)) return;
+
+        if (source.dataset.correct === 'true') {
+          identified.add(source.dataset.source);
+          source.classList.add('source-correct');
+          source.disabled = true;
+          message.textContent = correctMessages[source.dataset.source];
+          result.textContent = `${identified.size} of 3 radiation sources identified.`;
+          if (identified.size === 3) {
+            result.textContent = 'Congratulations, Radiation Scout! Stage 1 complete.';
+            continueButton.hidden = false;
+            sources.forEach(item => {
+              if (!identified.has(item.dataset.source)) item.disabled = true;
+            });
+          }
+          return;
+        }
+
+        source.classList.add('source-wrong');
+        message.textContent = 'Not quite. That object is not a radiation source. Try another target.';
+        window.setTimeout(() => source.classList.remove('source-wrong'), 700);
+      };
+    });
+
+    continueButton.onclick = () => {
+      closeModal('stage-one-overlay');
+      if (onComplete) onComplete();
+    };
+    openModal('stage-one-overlay');
+  }
+
+  function openStageTwoGame(location, onComplete) {
+    const overlay = document.getElementById('stage-two-overlay');
+    const message = document.getElementById('stage-two-message');
+    const result = document.getElementById('stage-two-result');
+    const continueButton = document.getElementById('stage-two-continue');
+    const materials = [...document.querySelectorAll('.stage-two-material')];
+    if (!overlay || !message || !result || !continueButton || !materials.length) return;
+
+    const selected = new Set();
+    const habitatName = location === 'moon' ? 'lunar' : 'Martian';
+    const regolithLabel = location === 'moon' ? 'Lunar regolith' : 'Mars regolith';
+    const regolithMaterial = materials.find(material => material.dataset.material === 'regolith');
+    if (regolithMaterial) {
+      const regolithName = regolithMaterial.querySelector('strong');
+      if (regolithName) regolithName.textContent = regolithLabel;
+    }
+
+    message.textContent = `Mission briefing: choose three materials to build a protective shield for the ${habitatName} habitat.`;
+    result.textContent = '';
+    continueButton.hidden = true;
+    materials.forEach(material => {
+      material.classList.remove('material-selected', 'material-wrong');
+      material.disabled = false;
+      material.onclick = () => {
+        const key = material.dataset.material;
+        if (selected.has(key)) {
+          selected.delete(key);
+          material.classList.remove('material-selected');
+          result.textContent = `${selected.size} of 3 materials selected.`;
+          return;
+        }
+
+        if (selected.size === 3) {
+          message.textContent = 'Choose only three materials. Tap a selected material to remove it first.';
+          material.classList.add('material-wrong');
+          window.setTimeout(() => material.classList.remove('material-wrong'), 700);
+          return;
+        }
+
+        selected.add(key);
+        material.classList.add('material-selected');
+        result.textContent = `${selected.size} of 3 materials selected.`;
+        if (selected.size !== 3) return;
+
+        const mass = [...selected].reduce((total, item) => {
+          const option = materials.find(materialOption => materialOption.dataset.material === item);
+          return total + Number(option.dataset.mass);
+        }, 0);
+        const protection = [...selected].reduce((total, item) => {
+          const option = materials.find(materialOption => materialOption.dataset.material === item);
+          return total + Number(option.dataset.protection);
+        }, 0);
+
+        if (mass <= 95 && protection >= 10) {
+          message.textContent = `Excellent design! Your shield uses ${mass} mass units and provides ${protection} protection points.`;
+          result.textContent = 'Congratulations, Shield Engineer! Stage 2 complete.';
+          continueButton.hidden = false;
+          materials.forEach(item => { item.disabled = true; });
+        } else {
+          message.textContent = `That design uses ${mass} mass units and provides ${protection} protection points. Adjust your materials to stay under 95 mass units and reach 10 protection points.`;
+        }
+      };
+    });
+
+    continueButton.onclick = () => {
+      closeModal('stage-two-overlay');
+      if (onComplete) onComplete();
+    };
+    openModal('stage-two-overlay');
+  }
+
+  function openStageThreeGame(location, onComplete) {
+    const overlay = document.getElementById('stage-three-overlay');
+    const message = document.getElementById('stage-three-message');
+    const result = document.getElementById('stage-three-result');
+    const continueButton = document.getElementById('stage-three-continue');
+    const actions = [...document.querySelectorAll('.stage-three-action')];
+    if (!overlay || !message || !result || !continueButton || !actions.length) return;
+
+    const selected = new Set();
+    const baseName = location === 'moon' ? 'Moon Base' : 'Mars Base';
+    const correctMessages = {
+      shelter: 'Correct! Move the crew into a shielded habitat before the storm peaks.',
+      pause: 'Correct! Stop outdoor activity while the radiation warning is active.',
+      power: 'Correct! Save power for life support and emergency communications.'
+    };
+
+    overlay.dataset.location = location;
+    message.textContent = `Solar storm alert at ${baseName}: choose the three safest responses.`;
+    result.textContent = '';
+    continueButton.hidden = true;
+    actions.forEach(action => {
+      action.classList.remove('action-correct', 'action-wrong');
+      action.disabled = false;
+      action.onclick = () => {
+        const key = action.dataset.action;
+        if (selected.has(key)) return;
+
+        if (action.dataset.correct === 'true') {
+          selected.add(key);
+          action.classList.add('action-correct');
+          action.disabled = true;
+          message.textContent = correctMessages[key];
+          result.textContent = `${selected.size} of 3 emergency responses selected.`;
+          if (selected.size === 3) {
+            result.textContent = 'Congratulations, Storm Commander! Stage 3 complete.';
+            continueButton.hidden = false;
+            actions.forEach(item => {
+              if (!selected.has(item.dataset.action)) item.disabled = true;
+            });
+          }
+          return;
+        }
+
+        action.classList.add('action-wrong');
+        message.textContent = 'Warning! Continuing outdoor activity exposes the crew to dangerous radiation. Choose a protective response.';
+        window.setTimeout(() => action.classList.remove('action-wrong'), 700);
+      };
+    });
+
+    continueButton.onclick = () => {
+      closeModal('stage-three-overlay');
+      if (onComplete) onComplete();
+    };
+    openModal('stage-three-overlay');
+  }
+
   function renderChapterGameplay(state, event) {
     const container = document.getElementById('chapter-gameplay-container');
     if (!container) return;
     container.innerHTML = '';
+
+    if (state.chapter === 2) {
+      renderChapterTwoGameplay(state, event, container);
+      return;
+    }
 
     const module = el('section', 'chapter-gameplay-panel');
     module.setAttribute('data-location', state.location);
@@ -284,14 +471,14 @@ const UI = (() => {
 
     const tasks = state.location === 'moon'
       ? [
-          ['Lunar radiation sweep', 'Scan the south-pole sensor array.'],
-          ['Shield integrity check', 'Confirm the regolith shelter is sealed.'],
-          ['Crew dosimeter sync', 'Verify every crew member is below the limit.']
+          ['Stage 1 — Discover the Invisible Threat', 'Identify the radiation sources in the space environment.'],
+          ['Stage 2 — Build Your Shield', 'Choose materials that balance protection and mass.'],
+          ['Stage 3 — Survive the Solar Storm', 'Choose the safest response to an approaching radiation event.']
         ]
       : [
-          ['Solar weather scan', 'Read the Martian sky and dust conditions.'],
-          ['Habitat pressure check', 'Confirm the airlock and habitat seals.'],
-          ['Crew life-support sync', 'Verify oxygen and power reserves.']
+          ['Stage 1 — Discover the Invisible Threat', 'Identify the radiation sources in the space environment.'],
+          ['Stage 2 — Build Your Shield', 'Choose materials that balance protection and mass.'],
+          ['Stage 3 — Survive the Solar Storm', 'Choose the safest response to an approaching radiation event.']
         ];
 
     const taskList = el('div', 'chapter-gameplay-tasks');
@@ -305,24 +492,166 @@ const UI = (() => {
       const taskCard = el('button', 'chapter-gameplay-task');
       taskCard.type = 'button';
       taskCard.appendChild(el('span', 'chapter-gameplay-task-number', `0${index + 1}`));
+      if (index < 3) {
+        const taskImage = document.createElement('img');
+        taskImage.className = 'chapter-gameplay-task-image';
+        taskImage.src = index === 0
+          ? 'src/assets/stage1.png'
+          : index === 1 ? 'src/assets/Stage 2.png' : 'src/assets/Stage 3.png';
+        taskImage.alt = index === 0
+          ? 'Stage 1 radiation source identification'
+          : index === 1 ? 'Stage 2 radiation shield construction' : 'Stage 3 solar storm response';
+        taskCard.appendChild(taskImage);
+      }
       const copy = el('span', 'chapter-gameplay-task-copy');
       copy.appendChild(el('strong', '', task[0]));
       copy.appendChild(el('small', '', task[1]));
       taskCard.appendChild(copy);
-      taskCard.appendChild(el('span', 'chapter-gameplay-task-action', 'RUN CHECK'));
+      taskCard.appendChild(el('span', 'chapter-gameplay-task-action',
+        index === 0 ? 'OPEN STAGE 1' : index === 1 ? 'OPEN STAGE 2' : 'OPEN STAGE 3'));
 
       taskCard.addEventListener('click', () => {
         if (taskCard.classList.contains('complete')) return;
-        taskCard.classList.add('complete');
-        taskCard.querySelector('.chapter-gameplay-task-action').textContent = 'CHECKED';
-        completed += 1;
-        progressFill.style.width = `${(completed / tasks.length) * 100}%`;
+        if (index === 0) {
+          openStageOneGame(() => {
+            taskCard.classList.add('complete');
+            taskCard.querySelector('.chapter-gameplay-task-action').textContent = 'COMPLETED';
+            completed += 1;
+            progressFill.style.width = `${(completed / tasks.length) * 100}%`;
+          });
+          return;
+        }
+        if (index === 1) {
+          openStageTwoGame(state.location, () => {
+            taskCard.classList.add('complete');
+            taskCard.querySelector('.chapter-gameplay-task-action').textContent = 'COMPLETED';
+            completed += 1;
+            progressFill.style.width = `${(completed / tasks.length) * 100}%`;
+          });
+          return;
+        }
+        openStageThreeGame(state.location, () => {
+          taskCard.classList.add('complete');
+          taskCard.querySelector('.chapter-gameplay-task-action').textContent = 'COMPLETED';
+          completed += 1;
+          progressFill.style.width = `${(completed / tasks.length) * 100}%`;
+          if (completed === tasks.length) {
+            localStorage.setItem(`astro_chapter_1_complete_${state.location}`, 'true');
+            if (state.location === 'moon') {
+              localStorage.setItem('astro_moon_level_2_unlocked', 'true');
+            }
+            if (typeof updateChapterUnlocks === 'function') updateChapterUnlocks();
+            const completion = el('div', 'chapter-completion-banner');
+            completion.appendChild(el('strong', '', 'Congratulations! All Chapter 1 stages cleared.'));
+            completion.appendChild(el('span', '', 'Chapter 2 is now unlocked. Continue to the historical solar storm case study.'));
+            module.appendChild(completion);
+          }
+        });
       });
       taskList.appendChild(taskCard);
     });
 
     module.appendChild(taskList);
     container.appendChild(module);
+  }
+
+  function renderChapterTwoGameplay(state, event, container) {
+    const module = el('section', 'chapter-gameplay-panel chapter-two-panel');
+    module.setAttribute('data-location', state.location);
+
+    const header = el('div', 'chapter-gameplay-header');
+    header.appendChild(el('div', 'chapter-gameplay-kicker',
+      state.location === 'moon' ? 'Moon Base // Chapter 2' : 'Mars Base // Chapter 2'));
+    header.appendChild(el('div', 'chapter-gameplay-title', 'Historical Solar Storm Lab'));
+    header.appendChild(el('div', 'chapter-gameplay-instruction',
+      'Study the May 2024 solar storm using recorded flare and proton observations.'));
+    module.appendChild(header);
+
+    const readout = el('div', 'chapter-gameplay-readout');
+    readout.appendChild(el('span', 'chapter-gameplay-readout-label', 'Case study'));
+    readout.appendChild(el('span', 'chapter-gameplay-readout-value', 'MAY 2024 // GANNON STORM'));
+    module.appendChild(readout);
+
+    const loading = el('div', 'historical-loading', 'Loading the verified historical event dataset...');
+    module.appendChild(loading);
+    container.appendChild(module);
+
+    function renderDataset(dataset) {
+      if (!dataset || !Array.isArray(dataset.records)) {
+        loading.textContent = 'Historical dataset is unavailable. No event values were invented.';
+        return;
+      }
+
+      loading.remove();
+      const flares = dataset.records.filter(record => record.record_type === 'solar_flare');
+      const sepEvents = dataset.records.filter(record => record.record_type === 'solar_energetic_particle_event');
+      const measuredPeaks = sepEvents.filter(record => record.proton_flux_peak_pfu !== null);
+
+      const stats = el('div', 'historical-stats');
+      stats.appendChild(el('div', 'historical-stat', `${flares.length} recorded flares`));
+      stats.appendChild(el('div', 'historical-stat', `${sepEvents.length} SEP records`));
+      stats.appendChild(el('div', 'historical-stat', `${measuredPeaks.length} reported proton peaks`));
+      module.appendChild(stats);
+
+      const lesson = el('div', 'historical-lesson');
+      lesson.appendChild(el('strong', '', 'Commander challenge'));
+      lesson.appendChild(el('span', '', 'Tap a SEP record to inspect its measured proton flux. Missing values stay missing.'));
+      module.appendChild(lesson);
+
+      const eventList = el('div', 'historical-event-list');
+      const detail = el('div', 'historical-event-detail', 'Select a historical SEP event to inspect its evidence.');
+      module.appendChild(eventList);
+      module.appendChild(detail);
+
+      sepEvents.forEach(record => {
+        const card = el('button', 'historical-event-card');
+        card.type = 'button';
+        card.appendChild(el('span', 'historical-event-id', record.record_id));
+        card.appendChild(el('strong', '', new Date(record.start_utc).toISOString().slice(0, 10)));
+        card.appendChild(el('small', '', record.proton_flux_peak_pfu === null
+          ? 'Peak proton flux: Not reported'
+          : `Peak proton flux: ${record.proton_flux_peak_pfu} pfu`));
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.historical-event-card').forEach(item => item.classList.remove('selected'));
+          card.classList.add('selected');
+          const fluxText = record.proton_flux_peak_pfu === null
+            ? 'Peak proton flux: Not reported in the cited event summary.'
+            : `Measured peak: ${record.proton_flux_peak_pfu} pfu at ${record.flux_peak_time_utc}.`;
+          detail.innerHTML = '';
+          detail.appendChild(el('strong', '', `${record.record_id} // ${fluxText}`));
+          detail.appendChild(el('span', '', record.description));
+          const source = el('a', '', 'Open original source reference');
+          source.href = record.source_reference;
+          source.target = '_blank';
+          source.rel = 'noopener noreferrer';
+          detail.appendChild(source);
+        });
+        eventList.appendChild(card);
+      });
+
+      const sourceNote = el('div', 'historical-source-note',
+        'Source: NASA CCMC DONKI event records and cited GOES proton-flux reports. This is an event-level starter dataset, not a five-minute time series.');
+      module.appendChild(sourceNote);
+    }
+
+    if (historicalDatasetCache) {
+      renderDataset(historicalDatasetCache);
+      return;
+    }
+
+    fetch('./src/data/may_2024_solar_events_starter_dataset.json')
+      .then(response => {
+        if (!response.ok) throw new Error(`Historical dataset returned ${response.status}`);
+        return response.json();
+      })
+      .then(dataset => {
+        historicalDatasetCache = dataset;
+        renderDataset(dataset);
+      })
+      .catch(error => {
+        console.error('Chapter 2: Could not load historical solar dataset.', error);
+        loading.textContent = 'Could not load the historical dataset. Please refresh and try again.';
+      });
   }
 
   function buildDecisionCard(decision) {

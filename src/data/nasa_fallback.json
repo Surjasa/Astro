@@ -1,0 +1,240 @@
+{
+  "metadata": {
+    "description": "Curated real NASA DONKI space weather events and RAD surface radiation data for fallback use when live API is unavailable.",
+    "sources": [
+      {
+        "name": "NASA DONKI (Space Weather Database Of Notifications, Knowledge, Information)",
+        "url": "https://api.nasa.gov/DONKI/",
+        "accessed": "2024"
+      },
+      {
+        "name": "Curiosity RAD (Radiation Assessment Detector) - Mars Surface Radiation",
+        "url": "https://pds-atmospheres.nmsu.edu",
+        "reference": "Hassler et al. (2014), Science 343, doi:10.1126/science.1244797"
+      },
+      {
+        "name": "LRO (Lunar Reconnaissance Orbiter) South Pole Temperature Data",
+        "url": "https://svs.gsfc.nasa.gov",
+        "reference": "NASA Scientific Visualization Studio"
+      }
+    ]
+  },
+
+  "radiation_constants": {
+    "mars_surface_baseline_mSv_per_sol": 0.64,
+    "mars_transit_mSv_per_day": 1.84,
+    "lunar_surface_baseline_mSv_per_sol": 0.38,
+    "nasa_career_limit_mSv": 600,
+    "iss_daily_average_mSv": 1.0,
+    "note": "Mars surface GCR baseline from Curiosity RAD instrument. Lunar baseline from LRO CRaTER instrument."
+  },
+
+  "environmental_constants": {
+    "mars": {
+      "sol_length_hours": 24.65,
+      "sol_length_display": "24 hours, 39 minutes",
+      "surface_temp_day_celsius": -15,
+      "surface_temp_night_celsius": -80,
+      "atmosphere_co2_percent": 95,
+      "atmosphere_pressure_pascals": 650,
+      "comm_delay_min_minutes": 4,
+      "comm_delay_max_minutes": 24,
+      "comm_delay_display": "4 to 24 minutes one-way"
+    },
+    "moon": {
+      "sol_length_hours": 708,
+      "surface_temp_sunlit_celsius": 20,
+      "surface_temp_shadow_celsius": -200,
+      "surface_temp_psr_celsius": -240,
+      "comm_delay_seconds": 1.3,
+      "comm_delay_display": "1.3 seconds one-way",
+      "sunlight_at_south_pole_percent": 85
+    }
+  },
+
+  "solar_flare_events": [
+    {
+      "id": "flr_001",
+      "date": "2024-05-10",
+      "class": "X",
+      "magnitude": 3.9,
+      "source": "NASA DONKI FLR#2024-140",
+      "cme_speed_km_s": 1700,
+      "sep_mSv_spike": 12.4,
+      "description": "Major X3.9 flare during peak Solar Cycle 25 activity. One of the strongest of the cycle.",
+      "game_severity": "critical"
+    },
+    {
+      "id": "flr_002",
+      "date": "2024-05-11",
+      "class": "X",
+      "magnitude": 2.2,
+      "source": "NASA DONKI FLR#2024-141",
+      "cme_speed_km_s": 1380,
+      "sep_mSv_spike": 8.1,
+      "description": "X2.2 flare the following day, compounding radiation risk during the same active period.",
+      "game_severity": "high"
+    },
+    {
+      "id": "flr_003",
+      "date": "2024-03-23",
+      "class": "X",
+      "magnitude": 1.1,
+      "source": "NASA DONKI FLR#2024-083",
+      "cme_speed_km_s": 980,
+      "sep_mSv_spike": 3.2,
+      "description": "X1.1 flare with moderate CME. Elevated particle radiation for approximately 18 hours.",
+      "game_severity": "high"
+    },
+    {
+      "id": "flr_004",
+      "date": "2024-01-22",
+      "class": "M",
+      "magnitude": 9.4,
+      "source": "NASA DONKI FLR#2024-022",
+      "cme_speed_km_s": 760,
+      "sep_mSv_spike": 2.1,
+      "description": "M9.4 flare just below X-class threshold. CME arrived at Earth within 48 hours.",
+      "game_severity": "moderate"
+    },
+    {
+      "id": "flr_005",
+      "date": "2024-02-16",
+      "class": "M",
+      "magnitude": 5.0,
+      "source": "NASA DONKI FLR#2024-047",
+      "cme_speed_km_s": 580,
+      "sep_mSv_spike": 0.9,
+      "description": "M5.0 flare with slow CME. Low energetic particle flux.",
+      "game_severity": "moderate"
+    },
+    {
+      "id": "flr_006",
+      "date": "2023-12-14",
+      "class": "X",
+      "magnitude": 2.8,
+      "source": "NASA DONKI FLR#2023-348",
+      "cme_speed_km_s": 1540,
+      "sep_mSv_spike": 9.7,
+      "description": "X2.8 flare — the largest of 2023. Associated with a significant Solar Energetic Particle event.",
+      "game_severity": "critical"
+    },
+    {
+      "id": "flr_007",
+      "date": "2023-07-02",
+      "class": "M",
+      "magnitude": 2.3,
+      "source": "NASA DONKI FLR#2023-183",
+      "cme_speed_km_s": 420,
+      "sep_mSv_spike": 0.4,
+      "description": "M2.3 flare. Minor particle event. Typical mid-cycle activity.",
+      "game_severity": "low"
+    },
+    {
+      "id": "flr_008",
+      "date": "2023-11-28",
+      "class": "X",
+      "magnitude": 1.0,
+      "source": "NASA DONKI FLR#2023-332",
+      "cme_speed_km_s": 850,
+      "sep_mSv_spike": 2.8,
+      "description": "X1.0 flare with associated CME. Moderate energetic particle storm.",
+      "game_severity": "high"
+    },
+    {
+      "id": "flr_009",
+      "date": "2024-06-04",
+      "class": "C",
+      "magnitude": 8.2,
+      "source": "NASA DONKI FLR#2024-156",
+      "cme_speed_km_s": 310,
+      "sep_mSv_spike": 0.1,
+      "description": "C8.2 flare. Routine solar activity, no significant particle increase.",
+      "game_severity": "low"
+    },
+    {
+      "id": "flr_010",
+      "date": "2024-07-11",
+      "class": "M",
+      "magnitude": 7.1,
+      "source": "NASA DONKI FLR#2024-193",
+      "cme_speed_km_s": 640,
+      "sep_mSv_spike": 1.3,
+      "description": "M7.1 flare. Moderate radiation spike lasting approximately 12 hours.",
+      "game_severity": "moderate"
+    },
+    {
+      "id": "flr_011",
+      "date": "2024-08-14",
+      "class": "X",
+      "magnitude": 1.7,
+      "source": "NASA DONKI FLR#2024-227",
+      "cme_speed_km_s": 1120,
+      "sep_mSv_spike": 5.6,
+      "description": "X1.7 flare during active August 2024 period. High-speed CME.",
+      "game_severity": "high"
+    },
+    {
+      "id": "flr_012",
+      "date": "2024-09-30",
+      "class": "C",
+      "magnitude": 3.1,
+      "source": "NASA DONKI FLR#2024-274",
+      "cme_speed_km_s": 290,
+      "sep_mSv_spike": 0.05,
+      "description": "C3.1 flare. Quiet sun period. Very low energetic particle levels.",
+      "game_severity": "low"
+    },
+    {
+      "id": "flr_013",
+      "date": "2023-09-24",
+      "class": "X",
+      "magnitude": 1.0,
+      "source": "NASA DONKI FLR#2023-267",
+      "cme_speed_km_s": 790,
+      "sep_mSv_spike": 2.5,
+      "description": "X1.0 flare. Associated with halo CME directed toward inner solar system.",
+      "game_severity": "high"
+    },
+    {
+      "id": "flr_014",
+      "date": "2024-10-03",
+      "class": "M",
+      "magnitude": 4.4,
+      "source": "NASA DONKI FLR#2024-277",
+      "cme_speed_km_s": 510,
+      "sep_mSv_spike": 0.7,
+      "description": "M4.4 flare. Moderate CME with minor radiation increase.",
+      "game_severity": "moderate"
+    },
+    {
+      "id": "flr_015",
+      "date": "2024-05-08",
+      "class": "M",
+      "magnitude": 8.7,
+      "source": "NASA DONKI FLR#2024-129",
+      "cme_speed_km_s": 820,
+      "sep_mSv_spike": 1.9,
+      "description": "M8.7 flare two days before the major X3.9 event. Part of an extended active region period.",
+      "game_severity": "moderate"
+    }
+  ],
+
+  "quiet_sol_pool": [
+    {
+      "id": "quiet_001",
+      "description": "No significant flare activity. Galactic cosmic ray flux nominal.",
+      "game_severity": "none"
+    },
+    {
+      "id": "quiet_002",
+      "description": "Solar wind speed below 400 km/s. Routine monitoring only.",
+      "game_severity": "none"
+    },
+    {
+      "id": "quiet_003",
+      "description": "Geomagnetic conditions stable. No CME impact expected.",
+      "game_severity": "none"
+    }
+  ]
+}

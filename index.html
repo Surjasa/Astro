@@ -141,7 +141,7 @@
           <div class="chapter-tile-num">1</div>
         </div>
 
-        <!-- Chapter 2 unlocks after completing the Moon radiation mission -->
+        <!-- Chapter 2 unlocks after clearing all Chapter 1 stages -->
         <div class="chapter-tile locked" id="chapter-2-tile" onclick="selectChapter(2)">
           <div class="chapter-tile-lock">&#128274;</div><div class="chapter-tile-num">2</div>
         </div>
@@ -169,26 +169,39 @@
         </button>
       </div>
 
-      <div class="chapter-story" id="chapter-story">
-        <div class="chapter-number-tag" id="chapter-number-tag">Chapter 01</div>
-        <h2 class="chapter-title" id="chapter-title">The Invisible Threat</h2>
-        <p class="chapter-tagline" id="chapter-tagline">
-          <em>Your journey to becoming a mission commander begins here.</em>
-        </p>
-        <div class="chapter-divider"></div>
-        <p class="chapter-story-label">Story Introduction</p>
-        <p class="chapter-story-body" id="chapter-story-body">
-          Humanity is preparing to establish its first permanent research outpost. But before joining the
-          mission, every astronaut must complete a series of survival training programmes.
-        </p>
-        <p class="chapter-story-body">
-          Your first challenge is to understand one of the most dangerous threats in space: radiation.
-          Unlike storms, fire or falling objects, radiation cannot be seen or felt directly.
-          You must learn to detect it, understand its risks, and protect your crew.
-        </p>
-        <p class="chapter-story-body">
-          <strong>Your training mission:</strong> Become a certified Radiation Safety Officer.
-        </p>
+      <div class="chapter-intro-content">
+        <div class="chapter-story" id="chapter-story">
+          <div class="chapter-number-tag" id="chapter-number-tag">Chapter 01</div>
+          <h2 class="chapter-title" id="chapter-title">The Invisible Threat</h2>
+          <p class="chapter-tagline" id="chapter-tagline">
+            <em>Your journey to becoming a mission commander begins here.</em>
+          </p>
+          <div class="chapter-divider"></div>
+          <p class="chapter-story-label">Story Introduction</p>
+          <div class="chapter-message-box" id="chapter-message-box" aria-live="polite">
+            <p class="chapter-story-body message-line active-line">
+              Humanity is preparing to establish its first permanent research outpost.
+            </p>
+            <p class="chapter-story-body message-line">
+              Before joining the mission, every astronaut must complete survival training.
+            </p>
+            <p class="chapter-story-body message-line">
+              Your first challenge is to understand the invisible danger of radiation.
+            </p>
+            <p class="chapter-story-body message-line">
+              Learn to detect its risks and protect your crew.
+            </p>
+            <p class="chapter-story-body message-line">
+              <strong>Your training mission: become a certified Radiation Safety Officer.</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="chapter-astronaut-box">
+          <div class="chapter-astronaut-label">Mission Commander</div>
+          <img src="src/assets/mar2.png" alt="Mission Commander astronaut" class="chapter-astronaut-image" draggable="false">
+          <div class="chapter-astronaut-name">Cmdr. Chen</div>
+        </div>
       </div>
 
       <button class="btn btn-confirm btn-full chapter-launch-btn" onclick="startChapter(1)">
@@ -407,6 +420,145 @@
     </div>
   </div>
 
+  <div class="modal-overlay stage-one-overlay" id="stage-one-overlay" onclick="if(event.target === this) UI.closeModal('stage-one-overlay')">
+    <div class="stage-one-window" role="dialog" aria-modal="true" aria-labelledby="stage-one-title">
+      <div class="stage-one-header">
+        <div>
+          <div class="stage-one-kicker">Stage 1 // Radiation Scout</div>
+          <h2 id="stage-one-title">Discover the Invisible Threat</h2>
+        </div>
+        <button class="stage-one-close" type="button" aria-label="Close Stage 1"
+          onclick="UI.closeModal('stage-one-overlay')">&#x2715;</button>
+      </div>
+      <p class="stage-one-instruction" id="stage-one-instruction">
+        Find the three radiation sources. Tap a source to identify it.
+      </p>
+      <img class="stage-one-image" src="src/assets/stage1.png"
+        alt="Solar particles and Earth's magnetic field" />
+      <div class="stage-one-message" id="stage-one-message" aria-live="polite">
+        Mission briefing: identify the radiation sources shown in the space scene.
+      </div>
+      <div class="stage-one-sources" id="stage-one-sources">
+        <button class="stage-one-source" type="button" data-source="solar" data-correct="true">
+          <span class="stage-one-source-icon solar-icon">☀</span>
+          <span><strong>Solar particle event</strong><small>Radiation from the Sun</small></span>
+        </button>
+        <button class="stage-one-source" type="button" data-source="cosmic" data-correct="true">
+          <span class="stage-one-source-icon cosmic-icon">✦</span>
+          <span><strong>Galactic cosmic rays</strong><small>High-energy particles from space</small></span>
+        </button>
+        <button class="stage-one-source" type="button" data-source="magnetic" data-correct="true">
+          <span class="stage-one-source-icon magnetic-icon">◉</span>
+          <span><strong>Magnetic-field exposure</strong><small>The exposed environment changes protection</small></span>
+        </button>
+        <button class="stage-one-source" type="button" data-source="satellite" data-correct="false">
+          <span class="stage-one-source-icon wrong-icon">▣</span>
+          <span><strong>Research satellite</strong><small>A vehicle, not a radiation source</small></span>
+        </button>
+      </div>
+      <div class="stage-one-result" id="stage-one-result"></div>
+      <button class="btn btn-confirm stage-one-continue" id="stage-one-continue" type="button" hidden>
+        Continue Mission
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay stage-two-overlay stage-one-overlay" id="stage-two-overlay"
+    onclick="if(event.target === this) UI.closeModal('stage-two-overlay')">
+    <div class="stage-two-window stage-one-window" role="dialog" aria-modal="true" aria-labelledby="stage-two-title">
+      <div class="stage-one-header">
+        <div>
+          <div class="stage-one-kicker">Stage 2 // Shield Engineer</div>
+          <h2 id="stage-two-title">Build Your Shield</h2>
+        </div>
+        <button class="stage-one-close" type="button" aria-label="Close Stage 2"
+          onclick="UI.closeModal('stage-two-overlay')">&#x2715;</button>
+      </div>
+      <p class="stage-one-instruction">
+        Select three materials. Build at least 10 protection points while staying under 95 mass units.
+      </p>
+      <img class="stage-one-image" src="src/assets/Stage 2.png"
+        alt="Radiation shield built around a lunar habitat" />
+      <div class="stage-one-message" id="stage-two-message" aria-live="polite">
+        Mission briefing: choose three materials to build a protective radiation shield.
+      </div>
+      <div class="stage-one-sources stage-two-materials">
+        <button class="stage-one-source stage-two-material" type="button" data-material="water"
+          data-mass="30" data-protection="3">
+          <span class="stage-one-source-icon water-icon">◆</span>
+          <span><strong>Water</strong><small>Mass 30 // Protection 3</small></span>
+        </button>
+        <button class="stage-one-source stage-two-material" type="button" data-material="polyethylene"
+          data-mass="25" data-protection="4">
+          <span class="stage-one-source-icon polyethylene-icon">⬢</span>
+          <span><strong>Polyethylene</strong><small>Mass 25 // Protection 4</small></span>
+        </button>
+        <button class="stage-one-source stage-two-material" type="button" data-material="regolith"
+          data-mass="45" data-protection="5">
+          <span class="stage-one-source-icon regolith-icon">●</span>
+          <span><strong>Regolith</strong><small>Mass 45 // Protection 5</small></span>
+        </button>
+        <button class="stage-one-source stage-two-material" type="button" data-material="wall"
+          data-mass="20" data-protection="2">
+          <span class="stage-one-source-icon wall-icon">▣</span>
+          <span><strong>Habitat wall design</strong><small>Mass 20 // Protection 2</small></span>
+        </button>
+      </div>
+      <div class="stage-one-result" id="stage-two-result"></div>
+      <button class="btn btn-confirm stage-one-continue" id="stage-two-continue" type="button" hidden>
+        Continue Mission
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay stage-three-overlay stage-one-overlay" id="stage-three-overlay"
+    onclick="if(event.target === this) UI.closeModal('stage-three-overlay')">
+    <div class="stage-three-window stage-one-window" role="dialog" aria-modal="true" aria-labelledby="stage-three-title">
+      <div class="stage-one-header">
+        <div>
+          <div class="stage-one-kicker">Stage 3 // Storm Commander</div>
+          <h2 id="stage-three-title">Survive the Solar Storm</h2>
+        </div>
+        <button class="stage-one-close" type="button" aria-label="Close Stage 3"
+          onclick="UI.closeModal('stage-three-overlay')">&#x2715;</button>
+      </div>
+      <p class="stage-one-instruction">
+        A solar particle event is approaching. Select the three safest emergency responses.
+      </p>
+      <img class="stage-one-image" src="src/assets/Stage 3.png"
+        alt="Solar storm approaching a space outpost" />
+      <div class="stage-one-message" id="stage-three-message" aria-live="polite">
+        Solar storm alert: choose the three safest responses.
+      </div>
+      <div class="stage-one-sources stage-three-actions">
+        <button class="stage-one-source stage-three-action" type="button"
+          data-action="shelter" data-correct="true">
+          <span class="stage-one-source-icon shelter-icon">◆</span>
+          <span><strong>Move crew to shelter</strong><small>Use the most protected habitat area</small></span>
+        </button>
+        <button class="stage-one-source stage-three-action" type="button"
+          data-action="pause" data-correct="true">
+          <span class="stage-one-source-icon pause-icon">Ⅱ</span>
+          <span><strong>Pause outdoor activity</strong><small>Stop EVA until the warning clears</small></span>
+        </button>
+        <button class="stage-one-source stage-three-action" type="button"
+          data-action="power" data-correct="true">
+          <span class="stage-one-source-icon power-icon">⚡</span>
+          <span><strong>Save emergency power</strong><small>Keep life support and communication online</small></span>
+        </button>
+        <button class="stage-one-source stage-three-action" type="button"
+          data-action="eva" data-correct="false">
+          <span class="stage-one-source-icon eva-icon">↗</span>
+          <span><strong>Continue the EVA</strong><small>Keep working outside during the storm</small></span>
+        </button>
+      </div>
+      <div class="stage-one-result" id="stage-three-result"></div>
+      <button class="btn btn-confirm stage-one-continue" id="stage-three-continue" type="button" hidden>
+        Continue Mission
+      </button>
+    </div>
+  </div>
+
   <!-- ===========================================================
        DATA ATTRIBUTION MODAL
        =========================================================== -->
@@ -468,6 +620,7 @@
   <script>
     /* ---- Location select ---- */
     var _selectedLocation = null;
+    var _selectedChapter = 1;
 
     function selectLocation(loc) {
       _selectedLocation = loc;
@@ -481,6 +634,7 @@
 
     function beginMission() {
       if (!_selectedLocation) return;
+      _selectedChapter = 1;
       updateChapterUnlocks();
 
       /* Apply background to both game-screen and chapter overlay */
@@ -527,9 +681,10 @@
       } else {
         document.body.classList.add('mars-active');
         document.body.classList.remove('moon-active');
+        var chapterBgUrl = "url('src/assets/Chapter.png')";
         var bgUrl = "url('src/assets/mars_habitat.jpg')";
         if (chBg) {
-          chBg.style.background = bgUrl + " center center / cover no-repeat";
+          chBg.style.background = chapterBgUrl + " center center / cover no-repeat";
         }
         if (gs) {
           gs.style.background = bgUrl + " center center / cover no-repeat fixed";
@@ -557,25 +712,130 @@
     }
 
     function closeChapterSelect() {
+      stopChapterMessages();
       var overlay = document.getElementById('chapter-overlay');
       if (overlay) {
         overlay.classList.remove('open', 'intro-open');
       }
     }
 
-    function selectChapter(num) {
-      if (num === 2 && localStorage.getItem('astro_moon_level_2_unlocked') === 'true') {
+    var _chapterMessageTimer = null;
+
+    function stopChapterMessages() {
+      if (_chapterMessageTimer) {
+        clearTimeout(_chapterMessageTimer);
+        _chapterMessageTimer = null;
+      }
+    }
+
+    function startChapterMessages() {
+      var lines = document.querySelectorAll('#chapter-message-box .message-line');
+      if (!lines.length) return;
+
+      stopChapterMessages();
+      var isMars = _selectedLocation === 'mars';
+      if (_selectedChapter === 2) {
+        var historicalMessages = isMars ? [
+          'Chapter 2 begins with a real solar storm recorded in May 2024.',
+          'NASA DONKI records the solar flares and SEP event times.',
+          'GOES proton-flux reports show what was measured — and what was not reported.',
+          'Read the evidence carefully before making your outpost decision.',
+          '<strong>Your training mission: become a historical storm analyst.</strong>'
+        ] : [
+          'Chapter 2 begins with a real solar storm recorded in May 2024.',
+          'NASA DONKI records the solar flares and SEP event times.',
+          'GOES proton-flux reports show what was measured — and what was not reported.',
+          'Read the evidence carefully before making your lunar outpost decision.',
+          '<strong>Your training mission: become a historical storm analyst.</strong>'
+        ];
+        lines.forEach(function(line, index) {
+          line.innerHTML = historicalMessages[index] || '';
+          line.classList.remove('revealed-line', 'active-line');
+        });
+        var historicalIndex = 0;
+        function revealHistoricalLine() {
+          if (historicalIndex >= lines.length) {
+            _chapterMessageTimer = null;
+            return;
+          }
+          if (historicalIndex > 0) lines[historicalIndex - 1].classList.remove('active-line');
+          lines[historicalIndex].classList.add('revealed-line', 'active-line');
+          historicalIndex++;
+          _chapterMessageTimer = setTimeout(revealHistoricalLine, 1800);
+        }
+        revealHistoricalLine();
         return;
       }
-      if (num !== 1) return;
+
+      var messages = isMars ? [
+        'Humanity is establishing its first research base at Jezero Crater.',
+        'Before joining the mission, every astronaut must complete survival training.',
+        'Your first challenge is to understand the invisible danger of radiation.',
+        'Learn to detect its risks and protect your crew on the Red Planet.',
+        '<strong>Your training mission: become a certified Radiation Safety Officer.</strong>'
+      ] : [
+        'Humanity is preparing to establish its first permanent lunar outpost.',
+        'Before joining the mission, every astronaut must complete survival training.',
+        'Your first challenge is to understand the invisible danger of radiation.',
+        'Learn to detect its risks and protect your crew at the lunar south pole.',
+        '<strong>Your training mission: become a certified Radiation Safety Officer.</strong>'
+      ];
+
+      lines.forEach(function(line, index) {
+        line.innerHTML = messages[index] || '';
+        line.classList.remove('revealed-line', 'active-line');
+      });
+
+      var index = 0;
+      function revealNextLine() {
+        if (index >= lines.length) {
+          _chapterMessageTimer = null;
+          return;
+        }
+        if (index > 0) lines[index - 1].classList.remove('active-line');
+        lines[index].classList.add('revealed-line', 'active-line');
+        index++;
+        _chapterMessageTimer = setTimeout(revealNextLine, 1800);
+      }
+      revealNextLine();
+    }
+
+    function selectChapter(num) {
+      if (num !== 1 && num !== 2) return;
+      if (num === 2 && !isChapterTwoUnlocked()) return;
+      _selectedChapter = num;
+      var numTag = document.getElementById('chapter-number-tag');
+      var titleEl = document.getElementById('chapter-title');
+      var taglineEl = document.getElementById('chapter-tagline');
+      var launchBtn = document.querySelector('#chapter-intro-modal .chapter-launch-btn');
+      if (num === 2) {
+        if (numTag) numTag.textContent = 'Chapter 02';
+        if (titleEl) titleEl.textContent = 'The Storm Archive';
+        if (taglineEl) taglineEl.innerHTML = '<em>Learn from a real solar storm and its measured particle data.</em>';
+        if (launchBtn) launchBtn.textContent = _selectedLocation === 'mars' ? 'Begin Chapter 2 — Mars' : 'Begin Chapter 2 — Moon';
+      } else {
+        if (numTag) numTag.textContent = 'Chapter 01';
+        if (titleEl) titleEl.textContent = _selectedLocation === 'mars' ? 'The Red Horizon' : 'The Invisible Threat';
+        if (taglineEl) taglineEl.innerHTML = _selectedLocation === 'mars'
+          ? '<em>Your journey to commanding a Martian outpost begins here.</em>'
+          : '<em>Your journey to becoming a lunar astronaut begins here.</em>';
+        if (launchBtn) launchBtn.textContent = _selectedLocation === 'mars' ? 'Begin Chapter 1 — Mars' : 'Begin Chapter 1 — Moon';
+      }
       var overlay = document.getElementById('chapter-overlay');
       if (overlay) overlay.classList.add('intro-open');
+      startChapterMessages();
+    }
+
+    function isChapterTwoUnlocked() {
+      var key = 'astro_chapter_1_complete_' + (_selectedLocation || 'moon');
+      return localStorage.getItem(key) === 'true' ||
+        (_selectedLocation === 'moon' && localStorage.getItem('astro_moon_level_2_unlocked') === 'true');
     }
 
     function updateChapterUnlocks() {
       var tile = document.getElementById('chapter-2-tile');
       if (!tile) return;
-      var unlocked = localStorage.getItem('astro_moon_level_2_unlocked') === 'true';
+      var unlocked = isChapterTwoUnlocked();
       tile.classList.toggle('locked', !unlocked);
       tile.classList.toggle('unlocked', unlocked);
       tile.classList.toggle('active-tile', unlocked);
@@ -585,13 +845,14 @@
     }
 
     function closeChapterIntro() {
+      stopChapterMessages();
       var overlay = document.getElementById('chapter-overlay');
       if (overlay) overlay.classList.remove('intro-open');
     }
 
     function startChapter(num) {
       closeChapterSelect();
-      GameController.startGame(_selectedLocation);
+      GameController.startGame(_selectedLocation, _selectedChapter);
     }
 
     function handleModalOverlayClick(event, modalId) {

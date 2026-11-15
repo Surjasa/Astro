@@ -9,12 +9,13 @@ const GameState = (() => {
   let _state = null;
 
   // ----- Initialise a fresh game -----
-  function init(location) {
+  function init(location, chapter) {
     // location: "moon" | "mars"
     const isMarsMission = location === "mars";
 
     _state = {
       location:          location,
+      chapter:           chapter || 1,
       isMarsMission:     isMarsMission,
       currentSol:        1,
       totalSols:         CONSTANTS.TOTAL_SOLS,
