@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mission Commander — NASA Outpost Simulator</title>
+  <meta name="description" content="Manage a lunar or Martian outpost. Balance power, radiation, and crew through real NASA space weather data.">
+
+  <!-- Google Fonts: Fredoka (titles, buttons, HUD) + Andika (body, instructions, reading) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+
+  <!-- Star field -->
+  <div class="stars-bg" id="stars-bg" aria-hidden="true"></div>
+
+  <!-- ===========================================================
+       SCREEN 1 — TITLE
+       =========================================================== -->
+  <section class="screen active" id="title-screen">
+    <div class="title-wrap">
+
+      <div class="nasa-badge">
+        <div class="nasa-badge-dot"></div>
+        <span class="nasa-badge-text">NASA Open Data Simulator</span>
+      </div>
+
+      <h1 class="game-title">Mission<br>Commander</h1>
+
+      <p class="game-subtitle">
+        You command a space outpost. Every sol, real NASA space weather shapes your mission.
+        Manage power, radiation, and your crew — no choice is free.
+      </p>
+
+      <div class="divider" style="max-width:360px; width:100%;"></div>
+
+      <div class="choose-label">Choose Your Mission Site</div>
+
+      <div class="location-grid">
+
+        <!-- MOON — full photo circle, no box -->
+        <div class="planet-pick" id="card-moon" onclick="selectLocation('moon')" role="button" tabindex="0" aria-label="Select Lunar South Pole">
+
+          <!-- The moon image IS the planet -->
+          <div class="planet-circle-wrap">
+            <img
+              src="src/assets/Moon.png"
+              alt="Full Moon"
+              class="planet-img moon-img"
+              draggable="false"
+            />
+            <div class="planet-atmosphere moon-atmo"></div>
+            <div class="planet-select-ring"></div>
+          </div>
+
+          <div class="planet-name">Lunar South Pole</div>
+          <div class="planet-mode">Cadet Mode</div>
+
+          <div class="planet-badges">
+            <span class="planet-badge">Comm: 1.3 sec</span>
+            <span class="planet-badge">Temp: +20 to -200 C</span>
+            <span class="planet-badge">Dose: 0.38 mSv/sol</span>
+          </div>
+
+        </div>
+
+        <!-- MARS — real photo, same layout as moon -->
+        <div class="planet-pick" id="card-mars" onclick="selectLocation('mars')" role="button" tabindex="0" aria-label="Select Mars Jezero Crater">
+
+          <div class="planet-circle-wrap">
+            <img
+              src="src/assets/Mars.png"
+              alt="Mars — Jezero Crater mission site"
+              class="planet-img mars-img"
+              draggable="false"
+            />
+            <div class="planet-atmosphere mars-atmo"></div>
+            <div class="planet-select-ring"></div>
+          </div>
+
+          <div class="planet-name">Jezero Crater</div>
+          <div class="planet-mode" style="color:var(--orange-lt); text-shadow:0 0 7px rgba(251,146,60,0.5);">Commander Mode</div>
+
+          <div class="planet-badges">
+            <span class="planet-badge">Comm: 4–24 min</span>
+            <span class="planet-badge">Temp: -15 to -80 C</span>
+            <span class="planet-badge">Dose: 0.64 mSv/sol</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <button class="btn btn-primary mt-8" id="start-btn" onclick="beginMission()" disabled
+        style="opacity:0.35; cursor:not-allowed; min-width:260px;">
+        Begin Mission
+      </button>
+
+      <button class="btn btn-secondary btn-sm mt-4" onclick="UI.openModal('data-modal')">
+        About the NASA Data
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ===========================================================
+       CHAPTER SELECT OVERLAY
+       Shows after Begin Mission is clicked, before game starts.
+       Moon theme (silver-blue) or Mars theme (orange-red).
+       =========================================================== -->
+  <div id="chapter-overlay" class="chapter-overlay">
+
+    <!-- Background fills the whole overlay, set by JS -->
+    <div class="chapter-bg" id="chapter-bg"></div>
+
+    <!-- Centered modal content -->
+    <div class="chapter-modal" id="chapter-modal">
+
+      <!-- Header strip -->
+      <div class="chapter-modal-header" id="chapter-modal-header">
+        <div class="chapter-academy-tag" id="chapter-academy-tag">
+          Astronaut Academy
+        </div>
+        <button class="chapter-close-btn" onclick="closeChapterSelect()" aria-label="Close">
+          &#x2715;
+        </button>
+      </div>
+
+      
+      <!-- Chapter level grid -->
+      <div class="chapter-grid-label">Select Chapter</div>
+      <div class="chapter-grid">
+
+        <!-- Chapter 1 — unlocked -->
+        <div class="chapter-tile unlocked active-tile" onclick="selectChapter(1)">
+          <div class="chapter-tile-star">&#9733;</div>
+          <div class="chapter-tile-num">1</div>
+        </div>
+
+        <!-- Chapter 2 unlocks after completing the Moon radiation mission -->
+        <div class="chapter-tile locked" id="chapter-2-tile" onclick="selectChapter(2)">
+          <div class="chapter-tile-lock">&#128274;</div><div class="chapter-tile-num">2</div>
+        </div>
+        <div class="chapter-tile locked"><div class="chapter-tile-lock">&#128274;</div><div class="chapter-tile-num">3</div></div>
+      
+      
+
+      </div>
+
+      <!-- Launch button -->
+      <button class="btn btn-confirm btn-full chapter-launch-btn" onclick="startChapter(1)">
+        Begin Chapter 1
+      </button>
+
+    </div>
+
+    <!-- Chapter 1 introduction panel -->
+    <div class="chapter-modal chapter-intro-modal" id="chapter-intro-modal">
+      <div class="chapter-modal-header">
+        <div class="chapter-academy-tag" id="chapter-intro-academy-tag">
+          Astronaut Academy
+        </div>
+        <button class="chapter-close-btn" onclick="closeChapterIntro()" aria-label="Back to chapter selection">
+          &#x2715;
+        </button>
+      </div>
+
+      <div class="chapter-story" id="chapter-story">
+        <div class="chapter-number-tag" id="chapter-number-tag">Chapter 01</div>
+        <h2 class="chapter-title" id="chapter-title">The Invisible Threat</h2>
+        <p class="chapter-tagline" id="chapter-tagline">
+          <em>Your journey to becoming a mission commander begins here.</em>
+        </p>
+        <div class="chapter-divider"></div>
+        <p class="chapter-story-label">Story Introduction</p>
+        <p class="chapter-story-body" id="chapter-story-body">
+          Humanity is preparing to establish its first permanent research outpost. But before joining the
+          mission, every astronaut must complete a series of survival training programmes.
+        </p>
+        <p class="chapter-story-body">
+          Your first challenge is to understand one of the most dangerous threats in space: radiation.
+          Unlike storms, fire or falling objects, radiation cannot be seen or felt directly.
+          You must learn to detect it, understand its risks, and protect your crew.
+        </p>
+        <p class="chapter-story-body">
+          <strong>Your training mission:</strong> Become a certified Radiation Safety Officer.
+        </p>
+      </div>
+
+      <button class="btn btn-confirm btn-full chapter-launch-btn" onclick="startChapter(1)">
+        Begin Chapter 1
+      </button>
+    </div>
+  </div>
+
+
+       
+  <section class="screen" id="game-screen">
+
+    <!-- TOP HUD BAR -->
+    <div class="top-hud">
+
+      <span class="hud-title" id="hud-location-label">MISSION COMMANDER</span>
+
+      <!-- Sol counter -->
+      <div class="hud-sol">
+        <span class="hud-sol-label">Sol</span>
+        <span class="hud-sol-number" id="sol-number">1</span>
+        <span class="hud-sol-of" id="sol-of-label">/ 10</span>
+      </div>
+
+      <!-- Resource icons — Power -->
+      <div class="hud-resources">
+
+        <div class="hud-res">
+          <div class="hud-res-icons" id="hud-power-icons">
+            <!-- 5 power bolt icons, filled/empty by JS -->
+          </div>
+          <div class="hud-res-info">
+            <span class="hud-res-label">Power</span>
+            <span class="hud-res-value power-val" id="val-power">100%</span>
+          </div>
+        </div>
+
+        <div class="hud-res">
+          <div class="hud-res-icons" id="hud-rad-icons">
+            <!-- 5 radiation icons, filled = radiation absorbed -->
+          </div>
+          <div class="hud-res-info">
+            <span class="hud-res-label">Radiation</span>
+            <span class="hud-res-value rad-val" id="val-radiation">0.0 mSv</span>
+          </div>
+        </div>
+
+        <div class="hud-res">
+          <div class="hud-res-icons" id="hud-crew-icons">
+            <!-- 5 crew icons, filled = healthy crew -->
+          </div>
+          <div class="hud-res-info">
+            <span class="hud-res-label">Crew</span>
+            <span class="hud-res-value crew-val" id="val-crew">100%</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mission progress bar -->
+      <div class="sol-strip">
+        <span class="sol-strip-label">Mission Progress</span>
+        <div class="sol-strip-track">
+          <div class="sol-strip-fill" id="sol-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <button class="hud-data-btn" onclick="UI.openModal('data-modal')">NASA DATA</button>
+
+    </div>
+
+    <!-- LOCATION-SPECIFIC GAMEPLAY MODULE -->
+    <div class="gameplay-module" id="gameplay-module">
+      <div class="gameplay-module-scanline"></div>
+      <div class="gameplay-module-icon" id="gameplay-module-icon">◈</div>
+      <div class="gameplay-module-copy">
+        <div class="gameplay-module-kicker" id="gameplay-module-kicker">Mission Operations</div>
+        <div class="gameplay-module-title" id="gameplay-module-title">Outpost Control Module</div>
+        <div class="gameplay-module-objective" id="gameplay-module-objective">
+          Monitor the environment and protect your crew.
+        </div>
+      </div>
+      <div class="gameplay-module-status">
+        <span class="gameplay-status-dot"></span>
+        <span id="gameplay-module-status">SYSTEMS ONLINE</span>
+      </div>
+    </div>
+
+    <!-- 3-COLUMN BODY -->
+    <div class="game-body">
+
+      <!-- LEFT: resource gauges -->
+      <div class="game-left">
+
+        <!-- Power gauge -->
+        <div class="res-gauge-block" id="gauge-power">
+          <div class="gauge-title" style="color:var(--neon-yellow); text-shadow:0 0 8px rgba(255,205,60,0.5);">
+            Power
+          </div>
+          <div class="gauge-ring" id="ring-power">
+            <div class="gauge-ring-inner">
+              <span class="gauge-ring-val" id="ring-val-power" style="color:var(--neon-yellow);">100</span>
+              <span class="gauge-ring-unit">%</span>
+            </div>
+          </div>
+          <div class="seg-bar" id="seg-power"></div>
+          <div class="gauge-label">Battery Reserve</div>
+        </div>
+
+        <!-- Radiation gauge -->
+        <div class="res-gauge-block" id="gauge-rad">
+          <div class="gauge-title" style="color:var(--neon-orange); text-shadow:0 0 8px rgba(255,100,40,0.5);">
+            Radiation
+          </div>
+          <div class="gauge-ring" id="ring-rad">
+            <div class="gauge-ring-inner">
+              <span class="gauge-ring-val" id="ring-val-rad" style="color:var(--neon-orange);">0.0</span>
+              <span class="gauge-ring-unit">mSv</span>
+            </div>
+          </div>
+          <div class="seg-bar" id="seg-rad"></div>
+          <div class="gauge-label">Cumulative Dose</div>
+          <div class="rad-note">Limit: <strong>50 mSv</strong><br><span style="font-size:0.58rem;">Curiosity RAD — NASA JPL</span></div>
+        </div>
+
+        <!-- Crew gauge -->
+        <div class="res-gauge-block" id="gauge-crew">
+          <div class="gauge-title" style="color:var(--neon-green); text-shadow:0 0 8px rgba(57,255,136,0.5);">
+            Crew
+          </div>
+          <div class="gauge-ring" id="ring-crew">
+            <div class="gauge-ring-inner">
+              <span class="gauge-ring-val" id="ring-val-crew" style="color:var(--neon-green);">100</span>
+              <span class="gauge-ring-unit">%</span>
+            </div>
+          </div>
+          <div class="seg-bar" id="seg-crew"></div>
+          <div class="gauge-label">Readiness</div>
+        </div>
+
+        <!-- Comm hint (Moon mode only) -->
+        <div id="comm-hint" class="comm-hint-box" style="display:none;"></div>
+
+      </div>
+
+      <!-- CENTER: mission briefing -->
+      <div class="game-center">
+        <div id="briefing-container">
+          <!-- Populated by UI.renderBriefing() -->
+        </div>
+        <div id="chapter-gameplay-container">
+          <!-- Populated by UI.renderChapterGameplay() -->
+        </div>
+      </div>
+
+      <!-- RIGHT: decision panel -->
+      <div class="game-right">
+        <div class="decisions-header">Your Decision</div>
+        <div class="decisions-hint" id="decisions-hint">
+          Review the options below. Each choice has a real cost — there is no free move.
+        </div>
+        <div id="decisions-container">
+          <!-- Decision cards populated by UI.renderBriefing() -->
+        </div>
+        <div id="confirm-btn-container" style="margin-top:4px;">
+          <!-- Confirm button populated by UI -->
+        </div>
+        <div id="comm-hint-right" class="comm-hint-box" style="display:none;"></div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===========================================================
+       SCREEN 3 — SOL RESULT
+       =========================================================== -->
+  <section class="screen" id="result-screen">
+    <div class="result-wrap">
+      <div id="result-container">
+        <!-- Populated by UI.renderSolResult() -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===========================================================
+       SCREEN 4 — MISSION DEBRIEF
+       =========================================================== -->
+  <section class="screen" id="debrief-screen">
+    <div id="debrief-container" style="max-width:720px; width:100%; display:flex; flex-direction:column; align-items:center;">
+      <!-- Populated by UI.renderDebrief() -->
+    </div>
+  </section>
+
+  <!-- ===========================================================
+       FAILURE OVERLAY
+       =========================================================== -->
+  <div class="modal-overlay" id="failure-overlay">
+    <div class="modal-box text-center"
+      style="border-color:rgba(255,60,60,0.55); box-shadow:0 0 60px rgba(255,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);">
+      <div style="
+        width:58px; height:58px; border-radius:50%;
+        background:rgba(160,0,0,0.3);
+        border:2px solid rgba(255,60,60,0.65);
+        box-shadow:0 0 22px rgba(255,0,0,0.42);
+        margin:0 auto 16px;
+        display:flex; align-items:center; justify-content:center;
+        font-family:var(--font-hud); font-size:1.6rem; font-weight:900;
+        color:var(--neon-red);">!</div>
+      <div class="section-label mb-8" style="color:var(--neon-red); text-shadow:0 0 10px rgba(255,60,60,0.65); margin-bottom:8px;">
+        Mission Critical Failure
+      </div>
+      <div class="result-title" style="color:var(--neon-red); text-shadow:0 0 18px rgba(255,0,0,0.55);">Mission Aborted</div>
+      <div id="failure-message" class="text-sm mt-12" style="color:var(--text-mid); line-height:1.65; margin-top:12px;"></div>
+      <div class="text-sm mt-16" style="color:var(--text-dim); margin-top:16px;">Loading mission debrief...</div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       DATA ATTRIBUTION MODAL
+       =========================================================== -->
+  <div class="modal-overlay" id="data-modal" onclick="handleModalOverlayClick(event,'data-modal')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+
+      <div class="modal-title">About the NASA Data</div>
+
+      <p class="text-sm" style="color:var(--text-mid); margin-bottom:20px; line-height:1.65;">
+        Every number in this game comes from real NASA mission data, not invented statistics.
+      </p>
+
+      <div class="data-source-block">
+        <div class="data-source-name">NASA DONKI — Space Weather Database</div>
+        <div class="data-source-desc">Solar flare events (class, magnitude, CME speed) are drawn from the DONKI archive at api.nasa.gov. The game attempts a live fetch each session. If unavailable it uses a curated set of 15 real historical events from 2023–2024, including the major X3.9 flare on May 10, 2024.</div>
+      </div>
+
+      <div class="data-source-block">
+        <div class="data-source-name">Curiosity RAD — Mars Surface Radiation</div>
+        <div class="data-source-desc">The baseline Martian surface radiation of 0.64 mSv per sol comes from the RAD instrument aboard Curiosity. Source: Hassler et al. (2014), Science 343. This is the first radiation measurement made on another planet's surface.</div>
+      </div>
+
+      <div class="data-source-block">
+        <div class="data-source-name">NASA LRO — Lunar South Pole</div>
+        <div class="data-source-desc">Lunar temperature ranges (+20 to -240 C), Peaks of Eternal Light, and Permanently Shadowed Region data come from LRO datasets published by NASA's Scientific Visualization Studio (svs.gsfc.nasa.gov).</div>
+      </div>
+
+      <div class="data-source-block">
+        <div class="data-source-name">Perseverance MEDA — Mars Environmental Data</div>
+        <div class="data-source-desc">Surface temperature ranges at Jezero Crater (-15 C day, -80 C night), 95% CO2 atmosphere, and ~650 Pa pressure from the MEDA instrument, available via NASA's Planetary Data System.</div>
+      </div>
+
+      <div class="data-source-block">
+        <div class="data-source-name">NASA OSDR — OSD-1018 Crew Isolation Study</div>
+        <div class="data-source-desc">The crew readiness penalty for extended shelter stays is informed by OSD-1018, which studied the combined effects of space radiation and social isolation on behavior. Available at osdr.nasa.gov/bio/repo.</div>
+      </div>
+
+      <div class="data-source-block" style="border-bottom:none;">
+        <div class="data-source-name">Communication Delay</div>
+        <div class="data-source-desc">Lunar delay (1.3 sec one-way) and Mars delay (4–24 min) are based on actual Earth-Moon and Earth-Mars distances at the speed of light.</div>
+      </div>
+
+      <button class="btn btn-secondary btn-sm w-full mt-16" onclick="UI.closeModal('data-modal')" style="margin-top:16px;">
+        Close
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       SCRIPTS
+       =========================================================== -->
+  <script src="src/js/constants.js"></script>
+  <script src="src/js/gameState.js"></script>
+  <script src="src/js/eventEngine.js"></script>
+  <script src="src/js/ui.js"></script>
+  <script src="src/js/gameController.js"></script>
+
+  <script>
+    /* ---- Location select ---- */
+    var _selectedLocation = null;
+
+    function selectLocation(loc) {
+      _selectedLocation = loc;
+      document.querySelectorAll('.planet-pick').forEach(function(c){ c.classList.remove('selected'); });
+      document.getElementById('card-' + loc).classList.add('selected');
+      var btn = document.getElementById('start-btn');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    }
+
+    function beginMission() {
+      if (!_selectedLocation) return;
+      updateChapterUnlocks();
+
+      /* Apply background to both game-screen and chapter overlay */
+      var gs = document.getElementById('game-screen');
+      var chBg = document.getElementById('chapter-bg');
+      var modal = document.getElementById('chapter-modal');
+      var introModal = document.getElementById('chapter-intro-modal');
+      var header = document.getElementById('chapter-modal-header');
+      var tag = document.getElementById('chapter-academy-tag');
+      var numTag = document.getElementById('chapter-number-tag');
+      var titleEl = document.getElementById('chapter-title');
+      var taglineEl = document.getElementById('chapter-tagline');
+      var storyBody = document.getElementById('chapter-story-body');
+      var launchBtn = document.querySelector('.chapter-launch-btn');
+      var introLaunchBtn = document.querySelector('#chapter-intro-modal .chapter-launch-btn');
+
+      if (gs) gs.setAttribute('data-location', _selectedLocation);
+
+      /* Set backgrounds */
+      document.body.style.background = 'transparent';
+      document.body.style.backgroundColor = 'transparent';
+
+      if (_selectedLocation === 'moon') {
+        document.body.classList.add('moon-active');
+        document.body.classList.remove('mars-active');
+        var bgUrl = "url('src/assets/moonradiation.jpg')";
+        if (chBg) {
+          chBg.style.background = bgUrl + " center center / cover no-repeat";
+        }
+        if (gs) {
+          gs.style.background = bgUrl + " center center / cover no-repeat fixed";
+          gs.style.backgroundColor = 'transparent';
+        }
+        /* Moon chapter theme — silver blue */
+        if (modal) modal.setAttribute('data-theme', 'moon');
+        if (introModal) introModal.setAttribute('data-theme', 'moon');
+        if (tag) tag.textContent = 'Chapter 01  ·  Astronaut Academy — Lunar Division';
+        if (numTag) numTag.textContent = 'Chapter 01';
+        if (titleEl) titleEl.textContent = 'The Invisible Threat';
+        if (taglineEl) taglineEl.innerHTML = '<em>Your journey to becoming a lunar astronaut begins here.</em>';
+        if (storyBody) storyBody.textContent = 'Humanity is preparing to establish its first permanent lunar research outpost. But before joining the mission, every astronaut must complete a series of survival training programmes.';
+        if (launchBtn) launchBtn.textContent = 'Begin Chapter 1 — Moon';
+        if (introLaunchBtn) introLaunchBtn.textContent = 'Begin Chapter 1 — Moon';
+      } else {
+        document.body.classList.add('mars-active');
+        document.body.classList.remove('moon-active');
+        var bgUrl = "url('src/assets/mars_habitat.jpg')";
+        if (chBg) {
+          chBg.style.background = bgUrl + " center center / cover no-repeat";
+        }
+        if (gs) {
+          gs.style.background = bgUrl + " center center / cover no-repeat fixed";
+          gs.style.backgroundColor = 'transparent';
+        }
+        /* Mars chapter theme — orange red */
+        if (modal) modal.setAttribute('data-theme', 'mars');
+        if (introModal) introModal.setAttribute('data-theme', 'mars');
+        if (tag) tag.textContent = 'Chapter 01  ·  Astronaut Academy — Mars Division';
+        if (numTag) numTag.textContent = 'Chapter 01';
+        if (titleEl) titleEl.textContent = 'The Red Horizon';
+        if (taglineEl) taglineEl.innerHTML = '<em>Your journey to commanding a Martian outpost begins here.</em>';
+        if (storyBody) storyBody.textContent = 'Humanity is establishing its first research base at Jezero Crater on Mars. The journey here took seven months. Now the real mission begins — surviving on a planet with no breathable air, extreme temperatures, and constant radiation.';
+        if (launchBtn) launchBtn.textContent = 'Begin Chapter 1 — Mars';
+        if (introLaunchBtn) introLaunchBtn.textContent = 'Begin Chapter 1 — Mars';
+      }
+
+      /* Update HUD label for when game loads */
+      var hudLabel = document.getElementById('hud-location-label');
+      if (hudLabel) hudLabel.textContent = _selectedLocation === 'mars' ? 'JEZERO CRATER — MARS' : 'LUNAR SOUTH POLE';
+
+      /* Show chapter overlay */
+      var overlay = document.getElementById('chapter-overlay');
+      if (overlay) overlay.classList.add('open');
+    }
+
+    function closeChapterSelect() {
+      var overlay = document.getElementById('chapter-overlay');
+      if (overlay) {
+        overlay.classList.remove('open', 'intro-open');
+      }
+    }
+
+    function selectChapter(num) {
+      if (num === 2 && localStorage.getItem('astro_moon_level_2_unlocked') === 'true') {
+        return;
+      }
+      if (num !== 1) return;
+      var overlay = document.getElementById('chapter-overlay');
+      if (overlay) overlay.classList.add('intro-open');
+    }
+
+    function updateChapterUnlocks() {
+      var tile = document.getElementById('chapter-2-tile');
+      if (!tile) return;
+      var unlocked = localStorage.getItem('astro_moon_level_2_unlocked') === 'true';
+      tile.classList.toggle('locked', !unlocked);
+      tile.classList.toggle('unlocked', unlocked);
+      tile.classList.toggle('active-tile', unlocked);
+      tile.setAttribute('aria-label', unlocked ? 'Chapter 2 unlocked' : 'Chapter 2 locked');
+      var lock = tile.querySelector('.chapter-tile-lock');
+      if (lock) lock.textContent = unlocked ? '★' : '🔒';
+    }
+
+    function closeChapterIntro() {
+      var overlay = document.getElementById('chapter-overlay');
+      if (overlay) overlay.classList.remove('intro-open');
+    }
+
+    function startChapter(num) {
+      closeChapterSelect();
+      GameController.startGame(_selectedLocation);
+    }
+
+    function handleModalOverlayClick(event, modalId) {
+      if (event.target === document.getElementById(modalId)) UI.closeModal(modalId);
+    }
+
+    /* ================================================================
+       SHINY STAR FIELD + FLOATING ORBS
+       ================================================================ */
+    (function buildStars() {
+      var c = document.getElementById('stars-bg');
+      var pals = [
+        '210,228,255','255,255,255','180,215,255',
+        '255,245,210','205,255,245','228,210,255','255,220,200',
+        '200,180,255','150,220,255'
+      ];
+      var rnd = Math.random;
+
+      /* tiny stars */
+      for (var i = 0; i < 190; i++) {
+        var s = document.createElement('div');
+        s.className = 'star';
+        var sz = (rnd()*1.1+0.4).toFixed(1);
+        var p  = pals[Math.floor(rnd()*pals.length)];
+        s.style.cssText =
+          'width:'+sz+'px;height:'+sz+'px;'+
+          'top:'+(rnd()*100).toFixed(2)+'%;left:'+(rnd()*100).toFixed(2)+'%;'+
+          'background:rgb('+p+');'+
+          '--dur:'+(rnd()*5+2).toFixed(1)+'s;--delay:'+(rnd()*7).toFixed(1)+'s;'+
+          '--min-op:'+(rnd()*0.07+0.03).toFixed(2)+';--max-op:'+(rnd()*0.4+0.18).toFixed(2)+';'+
+          '--sc:1.1;--gr:1px;--gc:'+p+';';
+        c.appendChild(s);
+      }
+
+      /* medium stars */
+      for (var i = 0; i < 65; i++) {
+        var s = document.createElement('div');
+        s.className = 'star';
+        var sz = (rnd()*1.6+1.2).toFixed(1);
+        var p  = pals[Math.floor(rnd()*pals.length)];
+        s.style.cssText =
+          'width:'+sz+'px;height:'+sz+'px;'+
+          'top:'+(rnd()*100).toFixed(2)+'%;left:'+(rnd()*100).toFixed(2)+'%;'+
+          'background:rgb('+p+');'+
+          '--dur:'+(rnd()*4+1.4).toFixed(1)+'s;--delay:'+(rnd()*5).toFixed(1)+'s;'+
+          '--min-op:'+(rnd()*0.1+0.08).toFixed(2)+';--max-op:'+(rnd()*0.3+0.6).toFixed(2)+';'+
+          '--sc:1.6;--gr:2px;--gc:'+p+';';
+        c.appendChild(s);
+      }
+
+      /* large glint-cross stars */
+      for (var i = 0; i < 20; i++) {
+        var s = document.createElement('div');
+        s.className = 'star large';
+        var sz = (rnd()*2.8+2.4).toFixed(1);
+        var p  = pals[Math.floor(rnd()*pals.length)];
+        s.style.cssText =
+          'width:'+sz+'px;height:'+sz+'px;'+
+          'top:'+(rnd()*94+2).toFixed(2)+'%;left:'+(rnd()*94+2).toFixed(2)+'%;'+
+          'background:rgb('+p+');'+
+          '--dur:'+(rnd()*3+1).toFixed(1)+'s;--delay:'+(rnd()*4).toFixed(1)+'s;'+
+          '--min-op:0.2;--max-op:1;--sc:1.7;--gr:'+sz+'px;--gc:'+p+';';
+        c.appendChild(s);
+      }
+
+      /* shooting stars */
+      [{tx:280,ty:130},{tx:340,ty:160},{tx:200,ty:95},{tx:420,ty:190}].forEach(function(a,idx) {
+        var ss = document.createElement('div');
+        ss.className = 'shooting-star';
+        ss.style.cssText =
+          'top:'+(rnd()*38+4).toFixed(1)+'%;left:'+(rnd()*48+4).toFixed(1)+'%;'+
+          '--sd:'+(rnd()*5+6).toFixed(1)+'s;--sdelay:'+(idx*5+rnd()*4).toFixed(1)+'s;'+
+          '--tx:'+a.tx+'px;--ty:'+a.ty+'px;';
+        c.appendChild(ss);
+      });
+
+      /* Floating colour orbs — large blurry glowing blobs */
+      var orbDefs = [
+        { size:380, top:'-8%',  left:'60%',  color:'rgba(124,58,237,0.18)',  dur:28, dx:40,  dy:-55, dx2:-25, dy2:30  },
+        { size:280, top:'30%',  left:'-5%',  color:'rgba(79,70,229,0.16)',   dur:22, dx:50,  dy:30,  dx2:-30, dy2:-40 },
+        { size:320, top:'65%',  left:'75%',  color:'rgba(6,182,212,0.14)',   dur:32, dx:-40, dy:-35, dx2:25,  dy2:50  },
+        { size:260, top:'80%',  left:'20%',  color:'rgba(234,88,12,0.12)',   dur:26, dx:35,  dy:-30, dx2:-20, dy2:40  },
+        { size:200, top:'10%',  left:'40%',  color:'rgba(16,185,129,0.1)',   dur:30, dx:-30, dy:40,  dx2:20,  dy2:-30 }
+      ];
+      orbDefs.forEach(function(o, idx) {
+        var orb = document.createElement('div');
+        orb.className = 'space-orb';
+        orb.style.cssText =
+          'width:'+o.size+'px;height:'+o.size+'px;'+
+          'top:'+o.top+';left:'+o.left+';'+
+          'background:radial-gradient(circle,'+o.color+' 0%,transparent 70%);'+
+          'filter:blur('+Math.round(o.size*0.18)+'px);'+
+          '--od:'+o.dur+'s;--odelay:'+(idx*3.5)+'s;'+
+          '--oa:1;'+
+          '--ox:'+o.dx+'px;--oy:'+o.dy+'px;'+
+          '--ox2:'+o.dx2+'px;--oy2:'+o.dy2+'px;';
+        document.body.appendChild(orb);
+      });
+    })();
+
+    /* Escape closes modals */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(function(m){ m.classList.remove('open'); });
+      }
+    });
+  </script>
+
+</body>
+</html>
